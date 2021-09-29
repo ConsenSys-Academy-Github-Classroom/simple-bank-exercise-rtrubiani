@@ -106,15 +106,11 @@ return enrolled[msg.sender];
       // return the user's balance.
 
       // 1. Use a require expression to guard/ensure sender has enough funds
-           if(balances[msg.sender] >= withdrawAmount){
+           require(balances[msg.sender] >= withdrawAmount);
             balances[msg.sender] -= withdrawAmount;
             emit LogWithdrawal(msg.sender, withdrawAmount, balances[msg.sender]);
             return balances[msg.sender];
-        } else {
-            emit LogWithdrawal(msg.sender, withdrawAmount, balances[msg.sender]);
-            return balances[msg.sender];
-        }
-    
+        
        
       // 2. Transfer Eth to the sender and decrement the withdrawal amount from
       //    sender's balance
