@@ -34,11 +34,11 @@ contract SimpleBank {
     accountAddress);
 
     // Add 2 arguments for this event, an accountAddress and an amount
-    event LogDepositMade();
+      event LogDepositMade(address accountAddress, uint amount);
 
     // Create an event called LogWithdrawal
     // Hint: it should take 3 arguments: an accountAddress, withdrawAmount and a newBalance 
-    event LogWithdrawal();
+    event LogWithdrawal(address accountAddress, uint withdrawAmount, uint newBalance);
 
     /* Functions
      */
@@ -58,6 +58,7 @@ contract SimpleBank {
       // 1. A SPECIAL KEYWORD prevents function from editing state variables;
       //    allows function to run locally/off blockchain
       // 2. Get the balance of the sender of this transaction
+      return balances[msg.sender];
     }
 
     /// @notice Enroll a customer with the bank
@@ -71,34 +72,50 @@ emit LogEnrolled(msg.sender);
 return enrolled[msg.sender];
 
     }
-
+ modifier onlyEnrolled {
+        require(
+            enrolled[msg.sender] == true,
+            "Only enrolled accounts can call this function."
+        );
+        _;
+    }
     /// @notice Deposit ether into bank
     /// @return The balance of the user after the deposit is made
-    function deposit() public returns (uint) {
+    function deposit() public payable onlyEnrolled returns (uint) {
       // 1. Add the appropriate keyword so that this function can receive ether
     
       // 2. Users should be enrolled before they can make deposits
 
       // 3. Add the amount to the user's balance. Hint: the amount can be
       //    accessed from of the global variable `msg`
-
+ balances[msg.sender] = msg.value;
       // 4. Emit the appropriate event associated with this function
-
+ emit LogDepositMade(msg.sender, msg.value);
       // 5. return the balance of sndr of this transaction
+       return balances[msg.sender];
     }
 
     /// @notice Withdraw ether from bank
     /// @dev This does not return any excess ether sent to it
     /// @param withdrawAmount amount you want to withdraw
     /// @return The balance remaining for the user
-    function withdraw(uint withdrawAmount) public returns (uint) {
+    function withdraw(uint withdrawAmount) public onlyEnrolled returns (uint) {
       // If the sender's balance is at least the amount they want to withdraw,
       // Subtract the amount from the sender's balance, and try to send that amount of ether
       // to the user attempting to withdraw. 
       // return the user's balance.
 
       // 1. Use a require expression to guard/ensure sender has enough funds
-
+           if(balances[msg.sender] >= withdrawAmount){
+            balances[msg.sender] -= withdrawAmount;
+            emit LogWithdrawal(msg.sender, withdrawAmount, balances[msg.sender]);
+            return balances[msg.sender];
+        } else {
+            emit LogWithdrawal(msg.sender, withdrawAmount, balances[msg.sender]);
+            return balances[msg.sender];
+        }
+    
+       
       // 2. Transfer Eth to the sender and decrement the withdrawal amount from
       //    sender's balance
 
